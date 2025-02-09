@@ -2,9 +2,10 @@
 
 ## Description
 
-Ce projet implémente un **algorithme de suivi d'objets basé sur les contours actifs** appliqué à l'analyse de mouvements dans des vidéos de football. Il utilise des techniques de filtrage d'image, de détection de gradient et de déformation de contours pour détecter et suivre les objets en mouvement.
+Ce projet est une implémentation d'un **algorithme de suivi d'objets basé sur les contours actifs** appliqué à l'analyse de mouvements dans des vidéos de football. Il utilise des techniques de filtrage d'image, de détection de gradient et de déformation de contours pour détecter et suivre les objets en mouvement.
 
 ## Principe de l'algorithme
+<img width="538" alt="schema" src="https://github.com/user-attachments/assets/74cc14cc-69f2-4015-877f-0706a0e3f5bb" />
 
 L'algorithme repose sur l'évolution d'un contour initial selon les forces **internes et externes** définies par :
 
