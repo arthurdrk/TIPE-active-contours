@@ -14,15 +14,9 @@ L'algorithme repose sur l'évolution d'un contour initial selon les forces **int
 
 ### Formulation mathématique
 
-L'évolution du contour suit l'équation : \(\alpha v''(s) - \beta v''''(s) + \lambda \nabla P(v(s)) = 0\)
+<img width="538" alt="schema" src="https://github.com/user-attachments/assets/7bd08070-a791-415a-ada9-e0b913d9d393" />
 
-où :
-
-- \(\alpha\) contrôle l'élasticité,
-- \(\beta\) contrôle la rigidité,
-- \(\lambda\) guide l'attraction du contour vers les bords.
-
-> *Figure 1 : Processus d'évolution du contour actif*&#x20;
+Le contour actif évolue de manière à minimiser la fonction coût ci-dessus.
 
 ## Installation
 
