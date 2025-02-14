@@ -182,7 +182,7 @@ def suivi_final(Coord_init, rx, ry, n, alpha, beta, gamma, n_iters, lambd, Fnorm
     ax.set_xlim(0, im_init.shape[1])
     ax.set_ylim(im_init.shape[0], 0)
     for i in range(len(contour_init)):
-        contour[i] = evolution(img, contour[i][0], contour[i][1], alpha, beta, gamma, n_iters, lambd, Fnorm, sigma)
+        contour[i] = evolution_contour(img, contour[i][0], contour[i][1], alpha, beta, gamma, n_iters, lambd, Fnorm, sigma)
         # Trace le contour initial.
         ax.plot(contour_init[i][0], contour_init[i][1], c='green', lw=2)
         # Trace le contour final.
