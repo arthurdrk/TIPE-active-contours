@@ -19,13 +19,22 @@ def egalise_histo(image):
 def rectangle(image, largeur, longueur):
     """
     Initialise le contour sous la forme d'un rectangle centré au milieu de l'image.
+    Renvoie deux tableaux :
+    X : coordonnées x des points du rectangle
+    Y : coordonnées y des points du rectangle
     """
     img_h, img_w = image.shape[:2]
     centre_x, centre_y = img_w // 2, img_h // 2
-    haut_gauche = (centre_x - largeur // 2, centre_y - longueur // 2)
-    bas_droite = (centre_x + largeur // 2, centre_y + longueur // 2)
-    cv2.rectangle(image, haut_gauche, bas_droite, color=(0, 255, 0), thickness=2)
-    return image
+    x_min = centre_x - largeur // 2
+    x_max = centre_x + largeur // 2
+    y_min = centre_y - longueur // 2
+    y_max = centre_y + longueur // 2
+
+    # On définit le contour du rectangle en reprenant le premier point pour fermer la boucle
+    X = np.array([x_min, x_max, x_max, x_min, x_min])
+    Y = np.array([y_min, y_min, y_max, y_max, y_min])
+    return X, Y
+
 
 
 def ellipse(centre, rx, ry, n):
@@ -134,7 +143,7 @@ def evolution_contour(img, X, Y, alpha, beta, gamma, n_iters, lambd, Fnorm, sigm
     n = len(X)
     A = creer_M(alpha, beta, n)
     M = np.eye(n) - gamma * A
-    InvM = np.inv(M)
+    InvM = np.linalg.inv(M)
     # Définition des vecteurs normaux pour la force normale
     X_normal = np.zeros(n)
     Y_normal = np.zeros(n)
@@ -145,6 +154,17 @@ def evolution_contour(img, X, Y, alpha, beta, gamma, n_iters, lambd, Fnorm, sigm
     norme_grad = np.sqrt(grad_x**2 + grad_y**2)
     grad_x2 = sobel(norme_grad, axis=0)
     grad_y2 = sobel(norme_grad, axis=1)
+    
+    # Configuration de l'affichage interactif
+    plt.ion()
+    fig, ax = plt.subplots()
+    ax.imshow(img, cmap='gray')
+    ax.axis('off')
+    # Affichage du contour initial en rouge
+    ax.plot(X, Y, 'r-', lw=2, label='Contour initial')
+    plt.draw()
+    plt.pause(0.5)
+    
     for i in range(n_iters):
         # Calcul des vecteurs normaux au contour
         for j in range(n-1):
@@ -157,7 +177,19 @@ def evolution_contour(img, X, Y, alpha, beta, gamma, n_iters, lambd, Fnorm, sigm
         Xiter = np.dot(InvM, X - gamma * (Fx(X, Y, img, lambd, grad_x2) + Fnorm * X_normal))
         Yiter = np.dot(InvM, Y - gamma * (Fy(X, Y, img, lambd, grad_y2) + Fnorm * Y_normal))
         X, Y = Xiter.copy(), Yiter.copy()
+        
+        # Affichage du contour intermédiaire ou final
+        if i < n_iters - 1:
+            ax.plot(X, Y, 'g-', lw=1)  # contour intermédiaire en vert
+        else:
+            ax.plot(X, Y, 'y-', lw=2, label='Contour final')  # contour final en jaune
+        plt.draw()
+        plt.pause(0.1)
+    
+    plt.ioff()
+    plt.show()
     return (X, Y)
+
 
 
 def suivi_final(Coord_init, rx, ry, n, alpha, beta, gamma, n_iters, lambd, Fnorm, sigma):
