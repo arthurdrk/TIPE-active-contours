@@ -16,25 +16,53 @@ def egalise_histo(image):
     egalise = cv2.equalizeHist(gris)
     return egalise
 
-def rectangle(image, largeur, longueur):
+def rectangle(image, largeur, longueur, n):
     """
     Initialise le contour sous la forme d'un rectangle centré au milieu de l'image.
     Renvoie deux tableaux :
-    X : coordonnées x des points du rectangle
-    Y : coordonnées y des points du rectangle
+      X : coordonnées x des n points du rectangle
+      Y : coordonnées y des n points du rectangle
+    Les points sont répartis uniformément le long du périmètre du rectangle.
     """
+    # Récupérer les dimensions de l'image
     img_h, img_w = image.shape[:2]
     centre_x, centre_y = img_w // 2, img_h // 2
+
+    # Calcul des extrémités du rectangle
     x_min = centre_x - largeur // 2
     x_max = centre_x + largeur // 2
     y_min = centre_y - longueur // 2
     y_max = centre_y + longueur // 2
 
-    # On définit le contour du rectangle en reprenant le premier point pour fermer la boucle
-    X = np.array([x_min, x_max, x_max, x_min, x_min])
-    Y = np.array([y_min, y_min, y_max, y_max, y_min])
-    return X, Y
+    # Périmètre du rectangle
+    perim = 2 * (largeur + longueur)
+    # Positions d'arc réparties uniformément le long du périmètre
+    s_values = np.linspace(0, perim, n, endpoint=False)
 
+    X = np.zeros(n)
+    Y = np.zeros(n)
+
+    for i, s in enumerate(s_values):
+        if s < largeur:
+            # Côté supérieur : de (x_min, y_min) à (x_max, y_min)
+            X[i] = x_min + s
+            Y[i] = y_min
+        elif s < largeur + longueur:
+            # Côté droit : de (x_max, y_min) à (x_max, y_max)
+            s_ = s - largeur
+            X[i] = x_max
+            Y[i] = y_min + s_
+        elif s < 2 * largeur + longueur:
+            # Côté inférieur : de (x_max, y_max) à (x_min, y_max)
+            s_ = s - (largeur + longueur)
+            X[i] = x_max - s_
+            Y[i] = y_max
+        else:
+            # Côté gauche : de (x_min, y_max) à (x_min, y_min)
+            s_ = s - (2 * largeur + longueur)
+            X[i] = x_min
+            Y[i] = y_max - s_
+    return X, Y
 
 
 def ellipse(centre, rx, ry, n):
@@ -118,7 +146,8 @@ def Fx(X, Y, img, lambd, grad2x):
     Sortie : terme de force Fx correspondant à l'énergie externe (liste de taille n).
     """
     X, Y = dans_image(X, Y, img)
-    return grad2x[(Y.round().astype(int), X.round().astype(int))] * lambd
+    M = grad2x[Y.round().astype(int), X.round().astype(int)]
+    return [M[i][0]*lambd for i in range(len(M))]
 
 
 def Fy(X, Y, img, lambd, grad2y):
@@ -129,7 +158,8 @@ def Fy(X, Y, img, lambd, grad2y):
     Sortie : terme de force Fy correspondant à l'énergie externe (liste de taille n).
     """
     X, Y = dans_image(X, Y, img)
-    return grad2y[(Y.round().astype(int), X.round().astype(int))] * lambd
+    M = grad2y[Y.round().astype(int), X.round().astype(int)]
+    return [M[i][0]*lambd for i in range(len(M))]
 
 
 def evolution_contour(img, X, Y, alpha, beta, gamma, n_iters, lambd, Fnorm, sigma):
@@ -147,14 +177,16 @@ def evolution_contour(img, X, Y, alpha, beta, gamma, n_iters, lambd, Fnorm, sigm
     # Définition des vecteurs normaux pour la force normale
     X_normal = np.zeros(n)
     Y_normal = np.zeros(n)
-    im_traitee = gaussian_filter(img, sigma)
+    
+    # Convertir l'image en float32 avant le filtrage pour éviter des problèmes de dtype
+    im_traitee = gaussian_filter(img.astype(np.float32), sigma)
+    
     # Calcul du gradient de l'image
     grad_x = sobel(im_traitee, axis=0)
     grad_y = sobel(im_traitee, axis=1)
-    norme_grad = np.sqrt(grad_x**2 + grad_y**2)
+    norme_grad = np.sqrt(grad_x**2 + grad_y**2).astype(np.float32)
     grad_x2 = sobel(norme_grad, axis=0)
     grad_y2 = sobel(norme_grad, axis=1)
-    
     # Configuration de l'affichage interactif
     plt.ion()
     fig, ax = plt.subplots()
@@ -189,6 +221,8 @@ def evolution_contour(img, X, Y, alpha, beta, gamma, n_iters, lambd, Fnorm, sigm
     plt.ioff()
     plt.show()
     return (X, Y)
+
+
 
 
 
