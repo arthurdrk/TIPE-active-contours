@@ -69,7 +69,4 @@ Cependant, il présente quelques **limitations** : ❌ Sensible à la qualité d
 📖 Caselles, V., Catté, F., Coll, T. "A geometric model for active contours" (1993)  
 📖 Cui et al. "SportsMOT: A Large Multi-Object Tracking Dataset" (2023)
 
----
-
-🛠 **Projet développé par Arthur De Rouck**
 
