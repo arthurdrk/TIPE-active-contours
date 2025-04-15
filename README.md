@@ -1,4 +1,4 @@
-# Suivi d'objets avec Contours Actifs
+# Suivi d'objets par Contours Actifs paramétriques
 
 ## Description
 
